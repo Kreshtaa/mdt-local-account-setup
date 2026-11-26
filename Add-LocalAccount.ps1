@@ -1,3 +1,5 @@
+#Requires -RunAsAdministrator
+
 param (
     [string]$UserName = "Kasutaja",
     [string]$UserDescription = "Kohalik Kasutaja"
