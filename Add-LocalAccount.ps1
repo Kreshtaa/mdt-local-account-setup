@@ -5,12 +5,17 @@ param (
     [string]$UserDescription = "Kohalik Kasutaja"
 )
 
+$ErrorActionPreference = "Stop"
+
 if (-not (Get-LocalUser -Name $UserName -ErrorAction SilentlyContinue)) {
-    New-LocalUser -Name $UserName -NoPassword -PasswordNeverExpires -FullName $UserName -Description $UserDescription
+    New-LocalUser -Name $UserName -NoPassword -FullName $UserName -Description $UserDescription
+    Set-LocalUser -Name $UserName -PasswordNeverExpires $true
     net user $UserName /logonpasswordchg:no | Out-Null
+    # The net user command is an external program so without explicit error handling it would fail silently.
+    if ($LASTEXITCODE -ne 0) { throw "'net user' command failed with exit code $LASTEXITCODE" }
 }
 
-$AdminGroupSID = "S-1-5-32-544" # See on alati Administrators grupi SID, aga selle nimi oleneb keelest.
+$AdminGroupSID = "S-1-5-32-544" # This is always the SID for Administrators, but the group display name depends on display language.
 if (-not (Get-LocalGroupMember -SID $AdminGroupSID | Where-Object { $_.Name -match "\\$UserName$" })) {
     Add-LocalGroupMember -SID $AdminGroupSID -Member $UserName
 }
@@ -22,7 +27,7 @@ if (-not (Test-Path $DestinationDir)) {
 
 $SourceScriptB = Join-Path -Path $PSScriptRoot "Configure-FirstBoot.ps1"
 $DestinationScriptB = Join-Path -Path $DestinationDir "Configure-FirstBoot.ps1"
-# ErrorAction Stop tagab, et task scheduler ei registreeriks taski mitteeksisteeriva scripti korral.
+# ErrorAction Stop makes sure task scheduler doesn't schedule a task if the script is misplaced or missing or otherwise problematic
 Copy-Item -Path $SourceScriptB -Destination $DestinationScriptB -Force -ErrorAction Stop
 
 $Arguments = '-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "{0}" -UserName "{1}"' -f $DestinationScriptB, $UserName
