@@ -1,5 +1,3 @@
-#Requires -RunAsAdministrator
-
 param (
     [string]$UserName = "Kasutaja"
 )
@@ -30,7 +28,7 @@ try {
     Set-ItemProperty -Path $WinLogonPath -Name "DefaultUserName" -Value $UserName
     Set-ItemProperty -Path $WinLogonPath -Name "DefaultPassword" -Value ""
     Set-ItemProperty -Path $WinLogonPath -Name "DefaultDomainName" -Value $env:COMPUTERNAME
-    
+
     Write-Host "Disabling built-in Administrator (SID ending in -500)..."
     Get-LocalUser | Where-Object { $_.SID.Value -match '-500$' } | Disable-LocalUser
 
