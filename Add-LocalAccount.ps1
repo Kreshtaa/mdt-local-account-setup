@@ -30,8 +30,14 @@ $DestinationScriptB = Join-Path -Path $DestinationDir "Configure-FirstBoot.ps1"
 # ErrorAction Stop makes sure task scheduler doesn't schedule a task if the script is misplaced or missing or otherwise problematic
 Copy-Item -Path $SourceScriptB -Destination $DestinationScriptB -Force -ErrorAction Stop
 
-$Arguments = '-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "{0}" -UserName "{1}"' -f $DestinationScriptB, $UserName
-$Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument $Arguments
+# $Arguments = '-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "{0}" -UserName "{1}"' -f $DestinationScriptB, $UserName
+# $Action = New-ScheduledTaskAction -Execute "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -Argument $Arguments
+# TEMPORARY DEBUG: cmd wrapper captures PowerShell's own output/errors from the task launch. delete next 4 lines and uncomment two above to revert
+$PSExe   = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
+$OutFile = Join-Path -Path $DestinationDir "out.txt"
+$Arguments = '/c {0} -NoProfile -ExecutionPolicy Bypass -File "{1}" -UserName "{2}" > "{3}" 2>&1' -f $PSExe, $DestinationScriptB, $UserName, $OutFile
+$Action = New-ScheduledTaskAction -Execute "cmd.exe" -Argument $Arguments
+
 $Trigger = New-ScheduledTaskTrigger -AtStartup
 $Principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
 $Settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
