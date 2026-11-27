@@ -1,4 +1,4 @@
-# local-account-setup
+# mdt-local-account-setup
 
 This is a two-stage PowerShell script primarily for use in an MDT Windows installation pipeline, after MDT finishes setting up the OS via Windows' built-in Administrator account, to create a local administrator account and disable the built-in Administrator account.
 Effectively it's a built-in admin to local admin pipeline. 
