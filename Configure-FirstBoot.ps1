@@ -28,8 +28,9 @@ try {
     Write-Host "Configuring Auto-Logon..."
     Set-ItemProperty -Path $WinLogonPath -Name "AutoAdminLogon" -Value "1"
     Set-ItemProperty -Path $WinLogonPath -Name "DefaultUserName" -Value $UserName
-    Remove-ItemProperty -Path $WinLogonPath -Name "DefaultPassword" -ErrorAction SilentlyContinue
-
+    Set-ItemProperty -Path $WinLogonPath -Name "DefaultPassword" -Value ""
+    Set-ItemProperty -Path $WinLogonPath -Name "DefaultDomainName" -Value $env:COMPUTERNAME
+    
     Write-Host "Disabling built-in Administrator (SID ending in -500)..."
     Get-LocalUser | Where-Object { $_.SID.Value -match '-500$' } | Disable-LocalUser
 

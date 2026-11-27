@@ -6,7 +6,8 @@ param (
 )
 
 if (-not (Get-LocalUser -Name $UserName -ErrorAction SilentlyContinue)) {
-    New-LocalUser -Name $UserName -NoPassword -FullName $UserName -Description $UserDescription
+    New-LocalUser -Name $UserName -NoPassword -PasswordNeverExpires -FullName $UserName -Description $UserDescription
+    net user $UserName /logonpasswordchg:no | Out-Null
 }
 
 $AdminGroupSID = "S-1-5-32-544" # See on alati Administrators grupi SID, aga selle nimi oleneb keelest.
